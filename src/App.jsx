@@ -18,10 +18,18 @@ function App() {
   const [selectedLokasi, setLokasi] = useState(null);
   const [dataPLU,setDataPLU]=useState(null);
   const [dataHarga,setDataHarga]=useState(Array(6).fill(0));
+  const [dataLokasi,setDataLokasi]=useState([]);
 
-    useEffect(()=>{console.log(dataPLU)},[dataPLU]);  
+  let namaItemGlobal=[];
+
+    useEffect(()=>{},[dataPLU]);  
     useEffect(() => {
         fetchData();
+    },[]);
+
+    useEffect(()=>{},[dataPLU]);  
+    useEffect(() => {
+        fetchDataLokasi();
     },[]);
 
     const fetchData = async () => {
@@ -33,6 +41,22 @@ function App() {
         const jsonDataNew=jsonData.data
         const jsonDataMap=jsonDataNew.map(function(data){return data.plu_barang_jadi})
         setDataPLU(jsonDataMap);
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Handle errors (e.g., display an error message)
+      }
+    };
+
+    const fetchDataLokasi = async () => {
+      try {
+        const response= await axiosinstance.get("/posts/ambilNamaLokasi")
+        const jsonData = response.data;   
+
+        // console.log(dataObject.data);
+        const jsonDataNew=jsonData.data
+        const jsonDataMap=jsonDataNew.map(function(data){return data.nama_lokasi})
+        setDataLokasi(jsonDataMap);
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -57,9 +81,9 @@ function App() {
     };
 
 
-    async function fetchDataHarga(plu){
+    async function fetchDataHarga(namaItem){
       try {
-        const response= await axiosinstance.get("/posts/ambilHarga/"+plu)
+        const response= await axiosinstance.get("/posts/ambilHarga/"+namaItem)
         const jsonData = response.data;   
 
         // console.log(dataObject.data);
@@ -135,9 +159,9 @@ function jumlahkan()
   function handleChange(event,index)
   {
   const newValues = namaItem;
-  newValues[index] = event.target.value;
+  newValues[hitung] = event.target.value;
   setNamaItem(newValues);
-  console.log(newValues);
+  console.log(namaItem);
 }
 
 function handleEnter(event,index)
@@ -148,22 +172,21 @@ function handleEnter(event,index)
   newValues[index] = event.target.value;
   setInputQty(newValues);
   fetchDataHarga(namaItem[hitung]);
-  console.log(Qty);
   setHitung(hitung+1);
   
-      
   }
 }
 
 function NewComponent({id}) {
   const [dataNamaItem,setDataNamaItem]=useState([])
 
-  useEffect(()=>{console.log(dataNamaItem)},[dataNamaItem]);  
+  useEffect(()=>{
+    console.log(dataNamaItem);},[dataNamaItem]);  
     useEffect(() => {
         fetchDataNamaItem().then(data=>{setDataNamaItem(data)});
     },[]);
 
-
+    namaItemGlobal=dataNamaItem;
 
   return  <div className='input'>
   <label className='label' for="combo-box-nama-item">Nama Item :</label>
@@ -226,11 +249,19 @@ return  <div className='input'>
     //   total_harga : 4000,
     //   lokasi : 'arcamanik'
     // }
+    const productObject = Object.fromEntries(zip(namaItemGlobal, dataPLU));
+
+function zip(arr1, arr2) {
+  // Helper function to create an array of key-value pairs (tuples)
+  return arr1.map((key, index) => [key, arr2[index]]);
+}
+
+console.log(productObject);
 
     for (let i=0; i<hitungKlik; i++) {
       const data={
         tanggal_transaksi_penjualan : selectedDateTime,
-        plu_barang_jadi : namaItem[i],
+        plu_barang_jadi : productObject[namaItem[i]],
         qty : Qty[i],
         total_harga : dataHarga[i]*Qty[i],
         lokasi : selectedLokasi
@@ -262,8 +293,12 @@ return  <div className='input'>
           <label className='label' for="combo-box-lokasi">Pilih Lokasi :</label>
           <select id="combo-box-lokasi" name="combo-box-lokasi" onChange={(event)=>{handleLokasiChange(event)}}>
             <option value="-">-</option>
-            <option value="Arcamanik">Arcamanik</option>
-            <option value="Gasibu">Gasibu</option>
+            {/* <option value="Arcamanik">Arcamanik</option>
+            <option value="Gasibu">Gasibu</option> */}
+
+            {
+      dataLokasi.map(item=>(<option value={item}>{item}</option>))
+            }
           </select>
         </div>
 
