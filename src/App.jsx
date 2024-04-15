@@ -2,6 +2,7 @@ import React, { useEffect, useState, ComponentLifecycle } from 'react'
 import './App.css'
 import 'bootstrap'
 import axiosinstance from '../src/lib/axios';
+import Cookies from 'js-cookie';
 import { formToJSON } from 'axios';
 
 
@@ -19,6 +20,18 @@ function App() {
   const [dataPLU,setDataPLU]=useState(null);
   const [dataHarga,setDataHarga]=useState(Array(6).fill(0));
   const [dataLokasi,setDataLokasi]=useState([]);
+  const [token, setToken] = useState('');
+
+  const getTokenFromCookie = () => {
+    const tokenFromCookie = Cookies.get('token');
+    if (tokenFromCookie) {
+      setToken(tokenFromCookie);
+    }
+  };
+
+  useEffect(() => {
+    getTokenFromCookie();
+  }, []);
 
   let namaItemGlobal=[];
 
@@ -31,6 +44,33 @@ function App() {
     useEffect(() => {
         fetchDataLokasi();
     },[]);
+
+    const fetchDataConsole = async () => {
+      const token_console = token;
+
+      try {
+        const response= await axiosinstance.get(
+          "/user",
+          {
+            headers: {
+              'Authorization': `Bearer ${token_console}`
+            }
+          }
+          )
+        const jsonData = response.data;   
+
+        // console.log(dataObject.data);
+        // const jsonDataNew=jsonData.data
+        // const jsonDataMap=jsonDataNew.map(function(data){return data.plu_barang_jadi})
+        // setDataPLU(jsonDataMap);
+        return jsonData;
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Handle errors (e.g., display an error message)
+      }
+    };
+
 
     const fetchData = async () => {
       try {
@@ -228,6 +268,7 @@ return  <div className='input'>
     setHitungKlik(hitungKlik+1);
 
     console.log(hitungKlik);
+    console.log(fetchDataConsole());
 
   };
 
