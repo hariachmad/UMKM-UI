@@ -3,7 +3,6 @@ import './App.css'
 import 'bootstrap'
 import axiosinstance from '../src/lib/axios';
 import Cookies from 'js-cookie';
-import { formToJSON } from 'axios';
 
 
 
@@ -273,6 +272,8 @@ return  <div className='input'>
   };
 
   const handleSimpan= async ()=>{
+    const setBearerToken=(token)=>{axiosinstance.defaults.headers.common['Authorization']='Bearer '+token};
+    setBearerToken("47|Eubx9xwrG6izzuuWm60HzELlQG3Kp8fsmii0wNSEf2fa0e31")
 
     // try {
     //   const productsResponse = await axiosinstance.get("/posts")
